@@ -9,11 +9,14 @@
 //
 
 #import "DZNSegmentedControl.h"
+#import <QuartzCore/QuartzCore.h>
+
+#define degreesToRadians(x) (M_PI * x / 180.0)
 
 @interface DZNSegmentedControl ()
 
 @property (nonatomic) BOOL initializing;
-@property (nonatomic, strong) UIView *selectionIndicator;
+@property (nonatomic, strong) UIImageView *selectionIndicator;
 @property (nonatomic, strong) UIView *hairline;
 @property (nonatomic, strong) NSMutableDictionary *colors;
 @property (nonatomic, strong) NSMutableArray *counts; // of NSNumber
@@ -74,19 +77,20 @@
     
     _showsCount = YES;
     _selectedSegmentIndex = -1;
+    _selectionIndicatorWidth = 2.0f;
     _selectionIndicatorHeight = 2.0f;
     _animationDuration = 0.2;
     _autoAdjustSelectionIndicatorWidth = YES;
     _adjustsButtonTopInset = YES;
     _font = [UIFont systemFontOfSize:15.0f];
     
-    _selectionIndicator = [UIView new];
+    _selectionIndicator = [[UIImageView alloc] init];
     _selectionIndicator.backgroundColor = self.tintColor;
     [self addSubview:_selectionIndicator];
     
-    _hairline = [UIView new];
-    _hairline.backgroundColor = [UIColor lightGrayColor];
-    [self addSubview:_hairline];
+//    _hairline = [UIView new];
+//    _hairline.backgroundColor = [UIColor lightGrayColor];
+//    [self addSubview:_hairline];
     
     _colors = [NSMutableDictionary new];
     _counts = [NSMutableArray array];
@@ -335,8 +339,8 @@
         frame.origin.x = (button.frame.size.width*(self.selectedSegmentIndex))+(button.frame.size.width-frame.size.width)/2;
     }
     else {
-        frame.size = CGSizeMake(button.frame.size.width, self.selectionIndicatorHeight);
-        frame.origin.x = (button.frame.size.width*(self.selectedSegmentIndex));
+        frame.size = CGSizeMake(self.selectionIndicatorWidth, self.selectionIndicatorHeight);
+        frame.origin.x = ((button.frame.size.width * self.selectedSegmentIndex) + (button.frame.size.width / 2) - (self.selectionIndicatorWidth / 2));
     }
     
     return frame;
@@ -411,6 +415,17 @@
 - (void)setWidth:(CGFloat)width
 {
     _width = width;
+    
+    [self layoutSubviews];
+}
+
+- (void)setSelectionIndicatorImage:(UIImage *)selectionIndicatorImage {
+    
+    _selectionIndicatorImage = selectionIndicatorImage;
+    
+    if (selectionIndicatorImage) {
+        _selectionIndicator.image = selectionIndicatorImage;
+    }
     
     [self layoutSubviews];
 }

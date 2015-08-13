@@ -10,7 +10,7 @@
 #import "DZNSegmentedControl.h"
 
 #define DEBUG_APPERANCE     0
-#define DEBUG_IMAGE         0
+#define DEBUG_IMAGE         1
 
 #define kBakgroundColor     [UIColor colorWithRed:0/255.0 green:87/255.0 blue:173/255.0 alpha:1.0]
 #define kTintColor          [UIColor colorWithRed:20/255.0 green:200/255.0 blue:255/255.0 alpha:1.0]
@@ -60,7 +60,9 @@
 #endif
     
     self.tableView.tableHeaderView = self.control;
-    self.tableView.tableFooterView = [UIView new];
+    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+    self.tableView.separatorColor = [UIColor colorWithRed:0.278 green:0.298 blue:0.314 alpha:1.000];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -85,9 +87,17 @@
     {
         _control = [[DZNSegmentedControl alloc] initWithItems:self.menuItems];
         _control.delegate = self;
-        _control.selectedSegmentIndex = 1;
+        _control.selectedSegmentIndex = 0;
         _control.bouncySelectionIndicator = NO;
         _control.height = 60.0f;
+        
+        // The image arrow to use as selection indicator
+        _control.selectionIndicatorImage = [UIImage imageNamed:@"suggested-friends-selected-arrow"];
+        _control.selectionIndicatorWidth = 16.5;
+        _control.selectionIndicatorHeight = 8.5;
+        
+        _control.tintColor = [UIColor clearColor];
+        _control.backgroundColor = [UIColor colorWithRed:0.400 green:1.000 blue:0.800 alpha:1.000];
         
 //                _control.height = 120.0f;
 //                _control.width = 300.0f;
@@ -126,11 +136,16 @@
     
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        cell.textLabel.textColor = [UIColor darkGrayColor];
     }
     
+//    if (indexPath.row == 0) {
+//        cell.separatorInset = UIEdgeInsetsMake(0.f, cell.bounds.size.width, 0.f, 0.f);
+//    }
+    
+    cell.textLabel.textColor = [UIColor whiteColor];
+    
 #if DEBUG_IMAGE
-    cell.textLabel.text = [NSString stringWithFormat:@"cell #%d", (int)indexPath.row+1];
+    cell.textLabel.text = [NSString stringWithFormat:@"Tab: %i - Cell: %d", (int)self.control.selectedSegmentIndex, (int)indexPath.row+1];
 #else
     cell.textLabel.text = [NSString stringWithFormat:@"%@ #%d", [[self.control titleForSegmentAtIndex:self.control.selectedSegmentIndex] capitalizedString], (int)indexPath.row+1];
 #endif
@@ -142,11 +157,27 @@
     return 60.0;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
-{
-    return 30.0;
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 0.0f;
 }
 
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    // Remove seperator inset
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
+        [cell setSeparatorInset:UIEdgeInsetsZero];
+    }
+    
+    // Prevent the cell from inheriting the Table View's margin settings
+    if ([cell respondsToSelector:@selector(setPreservesSuperviewLayoutMargins:)]) {
+        [cell setPreservesSuperviewLayoutMargins:NO];
+    }
+    
+    // Explictly set your cell's layout margins
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
+}
 
 #pragma mark - UITableViewDelegate Methods
 
